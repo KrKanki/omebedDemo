@@ -11,6 +11,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.logging.Logger;
 
@@ -22,9 +24,8 @@ public class OmebedUtil {
     //providers.json의 endpoints.url값 hostList setting
     public void providerData() throws IOException {
 
-
         hostList = new ArrayList<>();
-        ClassPathResource classPathResource = new ClassPathResource("dir/providers.json");
+        ClassPathResource classPathResource = new ClassPathResource("providers.json");
         BufferedReader br = new BufferedReader(new InputStreamReader(classPathResource.getInputStream()));
 
         JSONParser jsonParser = new JSONParser();
@@ -35,7 +36,7 @@ public class OmebedUtil {
             JSONArray providerArray = (JSONArray) obj;
 
             // endpoints.url 의 값 추출하는 과정
-            for( Object jsonArr: providerArray){
+            for (Object jsonArr : providerArray) {
                 JSONObject hostUrl = (JSONObject) jsonArr;
                 String endpoints = hostUrl.get("endpoints").toString();
 
@@ -45,13 +46,13 @@ public class OmebedUtil {
                 JSONObject urlData = (JSONObject) urlArray.get(0);
                 String url = (String) urlData.get("url");
                 hostList.add(url);
+
             }
+            System.out.println(hostList);
 
         } catch (ParseException e) {
             e.printStackTrace();
         }
-
-
     }
 
     // url 체크를 위해 Util 생성
@@ -61,7 +62,7 @@ public class OmebedUtil {
 
         String result = "";
 
-        Logger.getLogger(classNm, " param : {} " + hostCheck);
+//        Logger.getLogger(classNm, " param : {} " + hostCheck);
 
         try {
 
@@ -102,6 +103,45 @@ public class OmebedUtil {
             return false;
         }
     }
+
+    //oembed 메소드 실행전 uri create
+    public String createURI(String host, String encodingStr) {
+        //https://www.youtube.com/oembed?url=https%3A//youtube.com/watch%3Fv%3DM3r2XDceM6A&format=json
+        // https://oembed.com/#section 에서 request 날릴땐 위의 포맷형식으로 request를 해야하기 때문에 url 만드는 작업진행
+
+        String oembedUrl = "";
+        if(hostList == null){
+            try {
+                providerData();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        for (String hostUrl : hostList) {
+
+            if (hostUrl.contains(host)) {
+                // http://roomshare.jp/en/oembed.{format} oembed. 가 있을경우 formatting
+                if (hostUrl.contains("oembed.")) {
+                    if (hostUrl.contains("{format}"))
+                        hostUrl.replace("{format}", "json");
+                }
+
+                oembedUrl = hostUrl + "?url=" + encodingStr;
+            } else {
+//                "https://www.socialexplorer.com/services/oembed/" 형식일경우 format설정.
+                oembedUrl = hostUrl + "?format=json&url=" + encodingStr;
+            }
+
+        }
+        System.out.println(oembedUrl);
+        return  oembedUrl;
+
+    }
+
+
+
+
 
 
 
