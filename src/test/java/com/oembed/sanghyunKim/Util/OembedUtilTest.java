@@ -1,5 +1,8 @@
 package com.oembed.sanghyunKim.Util;
 
+
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -14,14 +17,16 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.logging.Logger;
 
-public class OmebedUtil {
+@SpringBootTest
+class OembedUtilTest {
 
+    OembedUtil util = new OembedUtil();
     String classNm = getClass().getName();
     ArrayList<String> hostList;
 
     //providers.json의 endpoints.url값 hostList setting
+    @Test
     public void providerData() throws IOException {
 
         hostList = new ArrayList<>();
@@ -56,25 +61,33 @@ public class OmebedUtil {
     }
 
     // url 체크를 위해 Util 생성
-    public  String hostCheck(String hostCheck) {
+    @Test
+    public void hostCheck() {
 
+        System.out.println("1111");
+        try {
+            providerData();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        String hostCheck = "http://www.youtube.com/watch?v=-FplGfZXqGc";
         String procNm = this.classNm + "hostCheck";
 
         String result = "";
 
-//        Logger.getLogger(classNm, " param : {} " + hostCheck);
+//        Logger.getLogger(classNm, " hostCheck : {} " + hostCheck);
 
         try {
 
             URL url = new URL(hostCheck);
-
+            System.out.println("======== " + url.toString());
             // url 에서 host 획득 후 host를 리턴시키기 위해 만듦
             // ex) https://www.youtube.com/watch?v=-FplGfZXqGc
             String[] list = url.getHost().split("\\.");
             // ex) www.youtube.com/watch?v=-FplGfZXqGc 형식일경우 www.youtube.com 을 추출
             if (list.length == 2) {
                 result = list[0];
-            // ex) https://www.youtube.com/watch?v=-FplGfZXqGc 형식이면 www.youtube.com을 추출
+                // ex) https://www.youtube.com/watch?v=-FplGfZXqGc 형식이면 www.youtube.com을 추출
             } else if (list.length == 3) {
                 result = list[1];
             }
@@ -83,40 +96,46 @@ public class OmebedUtil {
             e.printStackTrace();
         }
 
+        System.out.println(result);
 
-        return result;
+
+//        return result;
     }
 
-    // url에서 http를 입력되지 않고 넘어왓을때 return
-    public boolean httpCheck(String httpCheck){
+    @Test
+    public void httpCheck() {
 
         String result = "";
-//        String httpCheck = "http://www.youtube.com/watch?v=-FplGfZXqGc";
-        String[] http = {"http://","https://"};
-        if(httpCheck.substring(0, http[0].length()).contains(http[0]) || httpCheck.substring(0, http[1].length()).contains(http[1]) ){
+        String httpCheck = "http://www.youtube.com/watch?v=-FplGfZXqGc";
+
+        String[] http = {"http://", "https://"};
+        if (httpCheck.substring(0, http[0].length()).contains(http[0]) || httpCheck.substring(0, http[1].length()).contains(http[1])) {
+//        if(encode.contains(http[0]) || encode.contains(http[1]) ){
             result = "true";
+
             System.out.println(result);
-            return true;
-        }else{
+
+        } else {
             result = "false";
             System.out.println(result);
-            return false;
+
         }
     }
 
-    //oembed 메소드 실행전 uri create
-    public String createURI(String host, String encodingStr) {
+    @Test
+    public void createURI() {
         //https://www.youtube.com/oembed?url=https%3A//youtube.com/watch%3Fv%3DM3r2XDceM6A&format=json
         // https://oembed.com/#section 에서 request 날릴땐 위의 포맷형식으로 request를 해야하기 때문에 url 만드는 작업진행
 
-        String oembedUrl = "";
-        if(hostList == null){
-            try {
-                providerData();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+        try {
+            providerData();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
+        String requestUrl = "http://www.youtube.com/watch?v=-FplGfZXqGc";
+        String host = util.hostCheck(requestUrl);
+        String encodingStr = URLEncoder.encode(requestUrl, StandardCharsets.UTF_8);
+        String oembedUrl = "";
 
         for (String hostUrl : hostList) {
 
@@ -135,14 +154,7 @@ public class OmebedUtil {
 
         }
         System.out.println(oembedUrl);
-        return  oembedUrl;
-
     }
-
-
-
-
-
 
 
 }

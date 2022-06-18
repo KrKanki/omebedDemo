@@ -1,6 +1,6 @@
 package com.oembed.sanghyunKim.controller;
 
-import com.oembed.sanghyunKim.Util.OmebedUtil;
+import com.oembed.sanghyunKim.Util.OembedUtil;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -13,23 +13,22 @@ import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.logging.Logger;
 
 @Controller
 @RequestMapping("/*")
 public class MainController {
 
-    @GetMapping("/home.do")
+    @GetMapping("/main.do")
     public String home(Model model) {
 
-        return "home";
+        return "main";
     }
 
     @GetMapping("oEmbed.do")
     @ResponseBody
     public String oEmbedRequest(@RequestParam("requestUrl") String requestUrl) {
 
-        OmebedUtil util = new OmebedUtil();
+        OembedUtil util = new OembedUtil();
 
         // return을 위해 result 선언.
         String result = "";
@@ -38,11 +37,12 @@ public class MainController {
         if (util.httpCheck(requestUrl)) {
             String encode = URLEncoder.encode(requestUrl, StandardCharsets.UTF_8);
             String host = util.hostCheck(requestUrl);
-            String oembedUrl = util.createURI(host, encode);
+            String oEmbedUrl = util.createURI(host, encode);
+            System.out.println("oMebedUrl : "+oEmbedUrl);
 
             // httpclients를 생성해 데이터를 받아온다
             CloseableHttpClient hc = HttpClients.createDefault();
-            HttpGet httpGet = new HttpGet(oembedUrl);
+            HttpGet httpGet = new HttpGet(oEmbedUrl);
 
             // httpGet Header에 content type을 지정해주고
             httpGet.addHeader("Content-Type", "application/json");
